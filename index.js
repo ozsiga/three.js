@@ -10,42 +10,43 @@ function main() {
   const fov = 45;
   const aspect = 2; // the canvas default
   const near = 0.1;
-  const far = 100;
+  const far = 10;
   const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-  camera.position.set(0, 10, 20);
+  camera.position.set(10, 10, 20);
+  camera.zoom = 5;
   const controls = new THREE.OrbitControls(camera, canvas);
   controls.target.set(0, 0, 0);
   controls.update();
-
   const scene = new THREE.Scene();
   scene.background = new THREE.Color("lightblue");
 
-  {
-    const planeSize = 4000;
+  //Sakktábla texture
+  // {
+  //   const planeSize = 4000;
+  //   const loader = new THREE.TextureLoader();
+  //   const texture = loader.load(
+  //     "https://threejsfundamentals.org/threejs/resources/images/checker.png"
+  //   );
+  //   texture.wrapS = THREE.RepeatWrapping;
+  //   texture.wrapT = THREE.RepeatWrapping;
+  //   texture.magFilter = THREE.NearestFilter;
+  //   const repeats = planeSize / 200;
+  //   texture.repeat.set(repeats, repeats);
+  //   const planeGeo = new THREE.PlaneBufferGeometry(planeSize, planeSize);
+  //   const planeMat = new THREE.MeshPhongMaterial({
+  //     map: texture,
+  //     side: THREE.DoubleSide
+  //   });
+  //   var mesh = new THREE.Mesh(planeGeo, planeMat);
+  //   mesh.rotation.x = Math.PI * 5;
+  //   scene.add(mesh);
+  // }
 
-    const loader = new THREE.TextureLoader();
-    const texture = loader.load(
-      "https://threejsfundamentals.org/threejs/resources/images/checker.png"
-    );
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
-    texture.magFilter = THREE.NearestFilter;
-    const repeats = planeSize / 200;
-    texture.repeat.set(repeats, repeats);
 
-    const planeGeo = new THREE.PlaneBufferGeometry(planeSize, planeSize);
-    const planeMat = new THREE.MeshPhongMaterial({
-      map: texture,
-      side: THREE.DoubleSide
-    });
-    var mesh = new THREE.Mesh(planeGeo, planeMat);
-    mesh.rotation.x = Math.PI * 5;
-    //scene.add(mesh);
-  }
-
+  // Add lights to the scene
   {
     const skyColor = 0xffffff; // light blue
-    const groundColor = 0xffffff; // brownish orange
+    const groundColor = 0xffffff;
     const intensity = 1;
     const light = new THREE.HemisphereLight(skyColor, groundColor, intensity);
     scene.add(light);
@@ -59,6 +60,8 @@ function main() {
     scene.add(light);
     scene.add(light.target);
   }
+
+  ///////////////////////////////
 
   function frameArea(sizeToFitOnScreen, boxSize, boxCenter, camera) {
     const halfSizeToFitOnScreen = sizeToFitOnScreen * 1;
@@ -85,7 +88,7 @@ function main() {
     // point the camera to look at the center of the box
     camera.lookAt(boxCenter.x, boxCenter.y, boxCenter.z);
   }
-
+  //Load field object
   {
     const objLoader = new THREE.OBJLoader2();
     objLoader.loadMtl(
@@ -115,31 +118,16 @@ function main() {
       }
     );
   }
+  /////////////////////////////////////////////////////////
 
-  //   {
-  //     const objLoader = new THREE.OBJLoader2();
-  //     objLoader.loadMtl("./assets/sphere.mtl", null, materials => {
-  //       objLoader.setMaterials(materials);
-  //       objLoader.load("./assets/sphere.obj", event => {
-  //         const root = event.detail.loaderRootNode;
-  //         root.position.x = 100 + moveObject();
-  //         root.position.y = 150;
-  //         root.position.z = 350;
-  //         root.rotation.x = 1.5;
-  //         root.scale.x = 1;
-  //         root.scale.y = 1;
-  //         root.scale.z = 1;
-  //         scene.add(root);
-  //       });
-  //     });
-  //   }
-
+  //Make sphere objects
   makeSphere(scene, 100, 150, 350);
   makeSphere(scene, 150, 170, 350);
   makeSphere(scene, 150, 70, 350);
   makeSphere(scene, 180, 110, 350);
   makeSphere(scene, 190, 160, 350);
 
+  // resize canvas to display size
   function resizeRendererToDisplaySize(renderer) {
     const canvas = renderer.domElement;
     const width = canvas.clientWidth;
@@ -150,7 +138,8 @@ function main() {
     }
     return needResize;
   }
-
+  //////////////////////////////////////////////
+  // render canvas
   function render() {
     if (resizeRendererToDisplaySize(renderer)) {
       const canvas = renderer.domElement;
@@ -166,72 +155,76 @@ function main() {
   requestAnimationFrame(render);
 }
 ///////////////////////////////////////////////////////////////
+
+//Random move 
 function moveObject() {
   return Math.random() * 10 + Math.random() * 10;
 }
+//////////////////////////////////////
+
+//Load sphere objects
+
 function makeSphere(scene, x, y, z) {
-  const objLoader = new THREE.OBJLoader2();
-  objLoader.loadMtl("./assets/sphere.mtl", null, materials => {
-    objLoader.setMaterials(materials);
-    objLoader.load("./assets/sphere.obj", event => {
-      const root = event.detail.loaderRootNode;
-      root.name = "sphere";
-      root.position.x = x + 6;
-      root.position.y = y + 6;
-      root.position.z = z + 6;
-      root.rotation.x = 1.5;
-      root.scale.x = 1;
-      root.scale.y = 1;
-      root.scale.z = 1;
-      scene.add(root);
-      setInterval(() => {
-        positionSphere(root, sphere);
-      }, 100);
-      var geometry = new THREE.SphereGeometry(5, 32, 32);
-      var material = new THREE.MeshNormalMaterial({
-        color: "red",
-        //lights: true,
-        //alphaMap: "white",
-        wireframe: true
-      });
-      console.log(material);
-      // material.setValues({ lights: true });
-      var sphere = new THREE.Mesh(geometry, material);
-      root.name = "sphere";
-      sphere.position.x = x;
-      sphere.position.y = y;
-      sphere.position.z = z;
-      sphere.rotation.x = 1.5;
-      sphere.scale.x = 1;
-      sphere.scale.y = 1;
-      sphere.scale.z = 1;
-      scene.add(sphere);
-    });
+  // Load sphere object from .obj+.mtl file
+  // const objLoader = new THREE.OBJLoader2();
+  // objLoader.loadMtl("./assets/sphere.mtl", null, materials => {
+  //   objLoader.setMaterials(materials);
+  //   objLoader.load("./assets/sphere.obj", event => {
+  //     const root = event.detail.loaderRootNode;
+  //     root.name = "sphere";
+  //     root.position.x = x + 6;
+  //     root.position.y = y + 6;
+  //     root.position.z = z + 6;
+  //     root.rotation.x = 1.5;
+  //     root.scale.x = 1;
+  //     root.scale.y = 1;
+  //     root.scale.z = 1;
+  //     scene.add(root);
+
+  // Add sphere geometry from three.js
+  var geometry = new THREE.SphereGeometry(5, 15, 15);
+  var material = new THREE.MeshNormalMaterial({
+    wireframe: true
   });
+  var sphere = new THREE.Mesh(geometry, material);
+  sphere.name = "sphere";
+  sphere.position.x = x;
+  sphere.position.y = y;
+  sphere.position.z = z;
+  sphere.rotation.x = 1.5;
+  sphere.scale.x = 1;
+  sphere.scale.y = 1;
+  sphere.scale.z = 1;
+  scene.add(sphere);
+  setInterval(() => {
+    positionSphere(sphere);
+  }, 100);
+  //   });
+  // });
 }
+// delete object from scene
 
-function delete3DOBJ(objName, scene) {
-  var selectedObject = scene.getObjectByName(objName);
-  scene.remove(selectedObject);
-}
+// function delete3DOBJ(objName, scene) {
+//   var selectedObject = scene.getObjectByName(objName);
+//   scene.remove(selectedObject);
+// }
 
+// random position sphere objects 
 var sign = 1;
 
-function positionSphere(root, sphere) {
+function positionSphere(sphere) {
   if (
-    root.position.x >= 200 ||
-    root.position.y >= 300 ||
-    root.position.x <= 0 ||
-    root.position.y <= 0
+    sphere.position.x >= 200 ||
+    sphere.position.y >= 300 ||
+    sphere.position.x <= 0 ||
+    sphere.position.y <= 0
   ) {
     sign = sign * -1;
   }
-  root.position.x += sign * 1;
-  root.position.y += sign * 1.5;
+  // root.position.x += sign * 1;
+  // root.position.y += sign * 1.5;
   sphere.position.x += sign * 1;
   sphere.position.y += sign * 1.5;
-
-  //console.log(root.position.x, root.position.y);
 }
 ////////////////////////////////////////////////////////////////
 
